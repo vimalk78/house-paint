@@ -58,6 +58,13 @@ canvas { display: block; width: 100%; height: auto; touch-action: manipulation; 
   color: var(--ink); font: 500 .9rem var(--body); cursor: pointer;
 }
 .photos button[aria-pressed="true"] { border-color: var(--ink); font-weight: 600; }
+.light { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .8rem; color: var(--muted); }
+.light span { margin-right: 4px; letter-spacing: .06em; text-transform: uppercase; font-size: .72rem; font-weight: 600; }
+.light button {
+  min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font: 500 .82rem var(--body); cursor: pointer;
+}
+.light button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .photos button:disabled { color: var(--muted); cursor: not-allowed; }
 
 .panel { display: grid; gap: 18px; }
@@ -130,6 +137,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
       <button type="button" data-photo="front" aria-pressed="true">Front</button>
       <button type="button" data-photo="court" aria-pressed="false">Courtyard</button>
       <button type="button" data-photo="gate" aria-pressed="false">Gate</button>
+    </div>
+    <div class="light" role="group" aria-label="Daylight">
+      <span>Light</span>
+      <button type="button" data-light="soft" aria-pressed="true">Soft daylight</button>
+      <button type="button" data-light="sun" aria-pressed="false">Sunny</button>
     </div>
   </div>
 
@@ -257,11 +269,19 @@ for (const k of ["body", "trim"]) { const m = SHADES.find(x => `${x[0]} ${x[1]}`
 
 // Photos and paint maps live in img/. Maps were made offline, mostly by comparing Grok's repaints of each view: R = body area, G = trim area,
 // B = clean light and shade (128 = average daylight on the wall).
+// Two sets of photos: soft daylight (cloudy day) and full sun. The gate close-up is shared.
 const PHOTOS = {
+  soft: {
+    front: { photo: "img/soft-front.jpg?v=202610151356", map: "img/soft-front-map.png?v=202610151356", ceil: "img/soft-front-extra.png?v=202610151356", real: "img/soft-front-today.jpg?v=202610151356", win: "img/soft-front-win.png?v=202610151356", label: "Front of the house" },
+    court: { photo: "img/soft-court.jpg?v=202610151356", map: "img/soft-court-map.png?v=202610151356", ceil: "img/soft-court-extra.png?v=202610151356", real: "img/soft-court-today.jpg?v=202610151356", win: "img/soft-court-win.png?v=202610151356", label: "Courtyard" },
+  },
+  sun: {
   front: { photo: "img/front.jpg?v=202610151328", map: "img/front-map.png?v=202610151328", ceil: "img/front-extra.png?v=202610151328", real: "img/front-today.jpg?v=202610151328", win: "img/front-win.png?v=202610151349", label: "Front of the house" },
   court: { photo: "img/court.jpg?v=202610151328", map: "img/court-map.png?v=202610151328", ceil: "img/court-extra.png?v=202610151328", real: "img/court-today.jpg?v=202610151328", win: "img/court-win.png?v=202610151349", label: "Courtyard" },
   gate: { photo: "img/gate.jpg?v=202610151328", map: "img/gate-map.png?v=202610151333", ceil: "img/gate-extra.png?v=202610151328", real: "img/gate-today.jpg?v=202610151328", win: "img/gate-win.png?v=202610151349", label: "Main gate" },
+  },
 };
+PHOTOS.soft.gate = PHOTOS.sun.gate;
 const cv = document.getElementById("cv"), ctx = cv.getContext("2d", { willReadFrequently: true });
 const W = 1200, H = 900;
 let orig, out, map, ceil, real, win, today = false;
@@ -391,8 +411,11 @@ cmp.onclick = () => setToday(!today);
 function load(src) { return new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; }); }
 async function showPhoto(key) {
   document.querySelectorAll(".photos [data-photo]").forEach(b => b.setAttribute("aria-pressed", b.dataset.photo === key));
-  if (!cache[key]) {
-    const [photo, mp, cl, rl, wn] = await Promise.all([load(PHOTOS[key].photo), load(PHOTOS[key].map), load(PHOTOS[key].ceil), load(PHOTOS[key].real || PHOTOS[key].photo), load(PHOTOS[key].win)]);
+  current = key;
+  document.querySelectorAll(".light [data-light]").forEach(b => b.setAttribute("aria-pressed", b.dataset.light === light));
+  const P = PHOTOS[light][key], ck = light + ":" + key;
+  if (!cache[ck]) {
+    const [photo, mp, cl, rl, wn] = await Promise.all([load(P.photo), load(P.map), load(P.ceil), load(P.real || P.photo), load(P.win)]);
     const off = document.createElement("canvas"); off.width = W; off.height = H;
     const oc = off.getContext("2d", { willReadFrequently: true });
     oc.drawImage(mp, 0, 0, W, H); const m = oc.getImageData(0, 0, W, H);
@@ -400,14 +423,22 @@ async function showPhoto(key) {
     oc.clearRect(0, 0, W, H); oc.drawImage(wn, 0, 0, W, H); const wd = oc.getImageData(0, 0, W, H);
     oc.drawImage(rl, 0, 0, W, H); const t = oc.getImageData(0, 0, W, H);
     oc.drawImage(photo, 0, 0, W, H); const p = oc.getImageData(0, 0, W, H);
-    cache[key] = { map: m, ceil: c, orig: p, real: t, win: wd };
+    cache[ck] = { map: m, ceil: c, orig: p, real: t, win: wd };
   }
-  ({ map, ceil, orig, real, win } = cache[key]); out = out || ctx.createImageData(W, H);
-  cv.setAttribute("aria-label", PHOTOS[key].label + " with the chosen colours");
+  if (current !== key || PHOTOS[light][key] !== P) return;   // a newer choice arrived while loading
+  ({ map, ceil, orig, real, win } = cache[ck]); out = out || ctx.createImageData(W, H);
+  cv.setAttribute("aria-label", P.label + " with the chosen colours");
   render(today);
   try { localStorage.setItem("sk-photo", key); } catch (e) {}
 }
 document.querySelectorAll(".photos [data-photo]").forEach(b => b.onclick = () => showPhoto(b.dataset.photo));
+let light = "soft", current = "front";
+try { if (localStorage.getItem("sk-light") === "sun") light = "sun"; } catch (e) {}
+document.querySelectorAll(".light [data-light]").forEach(b => b.onclick = () => {
+  light = b.dataset.light;
+  try { localStorage.setItem("sk-light", light); } catch (e) {}
+  showPhoto(current);
+});
 let first = "front"; try { { const v = localStorage.getItem("sk-photo"); if (v === "court" || v === "gate") first = v; } } catch (e) {}
 showPhoto(first);
 
