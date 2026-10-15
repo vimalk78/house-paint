@@ -61,6 +61,7 @@ canvas { display: block; width: 100%; height: auto; touch-action: manipulation; 
 .photos button:disabled { color: var(--muted); cursor: not-allowed; }
 
 .panel { display: grid; gap: 18px; }
+.target-now { color: var(--accent); }
 .step-label { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
 
 .targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -129,7 +130,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
 
   <div class="panel">
     <section>
-      <p class="step-label">1 · What are you painting?</p>
+      <p class="step-label">1 · Tap Body or Trim</p>
       <div class="targets">
         <button class="target" id="t-body" type="button" aria-pressed="true">
           <span class="sw" id="sw-body"></span>
@@ -143,7 +144,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
     </section>
 
     <section>
-      <p class="step-label">2 · Tap an Asian Paints shade</p>
+      <p class="step-label">2 · Tap a shade for the <span class="target-now" id="target-now">body</span></p>
       <div class="groups" id="groups" role="group" aria-label="Colour family"></div>
       <div class="chips" id="chips"></div>
     </section>
@@ -307,6 +308,7 @@ function sync() {
     $("hx-" + k).textContent = state[k].hex.toUpperCase();
     $("t-" + k).setAttribute("aria-pressed", state.active === k);
   }
+  $("target-now").textContent = state.active === "body" ? "body (walls)" : "trim (bands, arches, gate)";
   const cur = state[state.active];
   $("picker").value = cur.hex.toLowerCase();
   if (document.activeElement !== $("hex")) { $("hex").value = cur.hex.toUpperCase(); $("hex").removeAttribute("aria-invalid"); }
