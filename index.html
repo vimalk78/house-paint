@@ -261,8 +261,8 @@ const ENAMELS = [
   ["Deep Bronze Green", "IS 224", "#3E4630"], ["French Blue", "IS 166", "#2458AF"], ["Oxford Blue", "IS 105", "#1F3057"],
   ["Black", "", "#1C1C1C"],
 ];
-const GROUPS = ["All", "Whites", "Creams & beiges", "Greys", "Greens & blues", "Pinks", "Deep"];
-const state = { active: "body", body: { hex: "#E9DEC1", name: "Cashmere-N 3119" }, trim: { hex: "#8E4B3F", name: "Terracotta-N 0427" }, win: { hex: "#74542F", name: "Middle Brown IS 411" } };
+const GROUPS = ["Whites", "Creams & beiges", "Greys", "Greens & blues", "Pinks", "Deep", "All"];
+const state = { active: "body", body: { hex: "#F3F2EC", name: "Absolute White L161" }, trim: { hex: "#F3E5CC", name: "Garlic Pod 8524" }, win: { hex: "#5C422E", name: "Dark Brown IS 412" } };
 try { const s = JSON.parse(localStorage.getItem("sk-mock")); if (s && s.body && s.trim) { state.body = s.body; state.trim = s.trim; } if (s && s.win) state.win = s.win; } catch (e) {}
 // Earlier versions used rough screen guesses for some shades; refresh saved picks to the checked values.
 for (const k of ["body", "trim"]) { const m = SHADES.find(x => `${x[0]} ${x[1]}` === state[k].name); if (m) state[k].hex = m[2]; }
