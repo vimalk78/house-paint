@@ -32,9 +32,14 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 16px 32px;
 }
-.app { max-width: 1040px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.app { max-width: 1640px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
 .app > *, .panel > * { min-width: 0; }
 @media (min-width: 860px) { .app { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; } }
+/* Laptops: give the photo most of the width, as large as fits the screen height, up to its real size */
+@media (min-width: 1100px) {
+  .app { grid-template-columns: minmax(0, 1200px) minmax(340px, 420px); justify-content: center; }
+  .photo-col { width: min(100%, calc((100vh - 160px) * 4 / 3)); justify-self: end; }
+}
 /* Phones held upright: keep the house in view while scrolling through shades */
 @media (max-width: 859px) and (orientation: portrait) {
   .photo-col { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); padding-block: 8px; }
@@ -52,6 +57,13 @@ canvas { display: block; width: 100%; height: auto; touch-action: manipulation; 
   padding: 10px 14px; font: 600 .85rem var(--body); background: rgba(20,20,18,.72); color: #fff;
   cursor: pointer; user-select: none; -webkit-user-select: none;
 }
+.big-btn { display: none; position: absolute; right: 10px; top: 10px; border: 0; border-radius: 999px;
+  padding: 8px 12px; font: 600 .8rem var(--body); background: rgba(20,20,18,.72); color: #fff; cursor: pointer; }
+@media (min-width: 860px) { .big-btn { display: block; } }
+/* Full size: the picture at its real 1200 x 900 pixels, scroll if the screen is smaller */
+.photo.big { position: fixed; inset: 0; z-index: 50; border-radius: 0; overflow: auto; background: rgba(12,12,10,.94); display: grid; place-items: center; }
+.photo.big canvas { width: 1200px; max-width: none; }
+.photo.big .compare, .photo.big .big-btn { position: fixed; }
 .photos { display: flex; gap: 8px; margin-top: 10px; }
 .photos button {
   flex: 1; min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
@@ -132,6 +144,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); ou
     <div class="photo">
       <canvas id="cv" width="1200" height="900" aria-label="Front of the house with the chosen colours"></canvas>
       <button class="compare" id="compare" type="button" aria-pressed="false">See house today</button>
+      <button class="big-btn" id="big" type="button" aria-pressed="false">Full size</button>
     </div>
     <div class="photos" role="group" aria-label="Photo">
       <button type="button" data-photo="front" aria-pressed="true">Front</button>
@@ -407,6 +420,15 @@ function setToday(on) {
   render(on);
 }
 cmp.onclick = () => setToday(!today);
+
+const big = $("big"), photoBox = document.querySelector(".photo");
+function setBig(on) {
+  photoBox.classList.toggle("big", on);
+  big.textContent = on ? "Close \u2715" : "Full size";
+  big.setAttribute("aria-pressed", on);
+}
+big.onclick = () => setBig(!photoBox.classList.contains("big"));
+document.addEventListener("keydown", e => { if (e.key === "Escape") setBig(false); });
 
 function load(src) { return new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; }); }
 async function showPhoto(key) {
