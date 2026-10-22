@@ -1,0 +1,495 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>House colours</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: phone-first stack (photo, target switch, shade chips, custom colour); two columns on wide screens */
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --ink: #23221f;
+  --muted: #6d6a62;
+  --line: #e2ded4;
+  --accent: #8a4b2f;
+  --accent-ink: #ffffff;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1916; --surface: #24221e; --ink: #efebe3; --muted: #a8a397;
+    --line: #3a3731; --accent: #d9926c; --accent-ink: #1a1916; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1a1916; --surface: #24221e; --ink: #efebe3; --muted: #a8a397;
+  --line: #3a3731; --accent: #d9926c; --accent-ink: #1a1916; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 32px;
+}
+.app { max-width: 1640px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.app > *, .panel > * { min-width: 0; }
+@media (min-width: 860px) { .app { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; } }
+/* Laptops: give the photo most of the width, as large as fits the screen height, up to its real size */
+@media (min-width: 1100px) {
+  .app { grid-template-columns: minmax(0, 1200px) minmax(340px, 420px); justify-content: center; }
+  .photo-col { width: min(100%, calc((100vh - 160px) * var(--ar, 1.333))); justify-self: end; }
+}
+/* Phones held upright: keep the house in view while scrolling through shades */
+@media (max-width: 859px) and (orientation: portrait) {
+  .photo-col { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); padding-block: 8px; }
+  .app { gap: 12px; }
+}
+header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; margin: 0; text-wrap: balance; }
+.tag { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.photo { position: relative; border-radius: 10px; overflow: hidden; background: var(--line); }
+@media (min-width: 860px) { .photo-col { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); } }
+canvas { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.compare {
+  position: absolute; right: 10px; bottom: 10px; border: 0; border-radius: 999px;
+  padding: 10px 14px; font: 600 .85rem var(--body); background: rgba(20,20,18,.72); color: #fff;
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.big-btn { display: none; position: absolute; right: 10px; top: 10px; border: 0; border-radius: 999px;
+  padding: 8px 12px; font: 600 .8rem var(--body); background: rgba(20,20,18,.72); color: #fff; cursor: pointer; }
+@media (min-width: 860px) { .big-btn { display: block; } }
+/* Full size: the picture at its real pixel size, scroll if the screen is smaller */
+.photo.big { position: fixed; inset: 0; z-index: 50; border-radius: 0; overflow: auto; background: rgba(12,12,10,.94); display: grid; place-items: center; }
+.photo.big canvas { width: auto; max-width: none; }
+.photo.big .compare, .photo.big .big-btn { position: fixed; }
+.photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.credit { font-size: .75rem; color: var(--muted); margin: 8px 0 0; }
+.credit a { color: inherit; }
+.photos button {
+  flex: 1; min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: 500 .9rem var(--body); cursor: pointer;
+}
+.photos button[aria-pressed="true"] { border-color: var(--ink); font-weight: 600; }
+.light { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .8rem; color: var(--muted); }
+.light span { margin-right: 4px; letter-spacing: .06em; text-transform: uppercase; font-size: .72rem; font-weight: 600; }
+.light button {
+  min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font: 500 .82rem var(--body); cursor: pointer;
+}
+.light button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.photos button:disabled { color: var(--muted); cursor: not-allowed; }
+
+.panel { display: grid; gap: 18px; }
+.target-now { color: var(--accent); }
+.step-label { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+
+.targets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.target {
+  display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; text-align: left;
+  padding: 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface);
+  color: var(--ink); cursor: pointer; font-family: var(--body); min-width: 0;
+}
+.target[aria-pressed="true"] { border-color: var(--accent); }
+.target .sw { width: 44px; height: 44px; border-radius: 8px; border: 1px solid rgba(0,0,0,.15); }
+.target .t1 { font-weight: 600; font-size: .95rem; }
+.target .t2 { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.target .t0 { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.target > div { min-width: 0; }
+@media (max-width: 559px) {
+  .target { grid-template-columns: 1fr; gap: 6px; padding: 8px; }
+  .target .sw { width: 100%; height: 28px; }
+  .target .t1 { font-size: .85rem; overflow-wrap: anywhere; }
+}
+
+.chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
+@media (min-width: 860px) { .chips { flex-wrap: wrap; overflow: visible; } }
+.chip {
+  flex: 0 0 auto; width: 92px; scroll-snap-align: start; border: 2px solid transparent; border-radius: 10px;
+  background: var(--surface); padding: 6px; cursor: pointer; text-align: left; color: var(--ink); font-family: var(--body);
+}
+.chip[aria-pressed="true"] { border-color: var(--accent); }
+.groups { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; }
+.group {
+  flex: 0 0 auto; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font: 500 .82rem var(--body); cursor: pointer; white-space: nowrap;
+}
+.group[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .sw { height: 52px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); }
+.chip .n { font-size: .78rem; font-weight: 600; margin-top: 6px; line-height: 1.2; }
+.chip .c { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.custom { display: flex; gap: 10px; align-items: center; }
+.custom input[type="color"] { width: 56px; height: 48px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--surface); cursor: pointer; }
+.custom input[type="text"] {
+  flex: 1; min-width: 0; height: 48px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: 500 1rem ui-monospace, "SF Mono", Menlo, monospace; padding: 0 12px; text-transform: uppercase;
+}
+.custom input[type="text"][aria-invalid="true"] { border-color: #c0392b; }
+.note { font-size: .8rem; color: var(--muted); margin: 0; max-width: 60ch; }
+.save {
+  width: 100%; min-height: 52px; border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-ink);
+  font: 600 1rem var(--body); cursor: pointer;
+}
+.save-msg { font-size: .8rem; color: var(--muted); margin: 6px 0 0; min-height: 1.2em; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="app">
+  <header>
+    <h1 id="title">House colours</h1>
+    <span class="tag">Mock-up</span>
+  </header>
+
+  <div class="photo-col">
+    <div class="photo">
+      <canvas id="cv" width="1200" height="900" aria-label="The house with the chosen colours"></canvas>
+      <button class="compare" id="compare" type="button" aria-pressed="false">See house today</button>
+      <button class="big-btn" id="big" type="button" aria-pressed="false">Full size</button>
+    </div>
+    <div class="photos" role="group" aria-label="Photo">
+    </div>
+    <p class="credit" id="credit" hidden></p>
+  </div>
+
+  <div class="panel">
+    <section>
+      <p class="step-label">1 · Tap Body, Trim or Windows</p>
+      <div class="targets">
+        <button class="target" id="t-body" type="button" aria-pressed="true">
+          <span class="sw" id="sw-body"></span>
+          <div><div class="t0">Body</div><div class="t1" id="nm-body"></div><div class="t2" id="hx-body"></div></div>
+        </button>
+        <button class="target" id="t-trim" type="button" aria-pressed="false">
+          <span class="sw" id="sw-trim"></span>
+          <div><div class="t0">Trim</div><div class="t1" id="nm-trim"></div><div class="t2" id="hx-trim"></div></div>
+        </button>
+        <button class="target" id="t-win" type="button" aria-pressed="false">
+          <span class="sw" id="sw-win"></span>
+          <div><div class="t0">Windows</div><div class="t1" id="nm-win"></div><div class="t2" id="hx-win"></div></div>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <p class="step-label">2 · Tap <span id="list-kind">a shade</span> for the <span class="target-now" id="target-now">body</span></p>
+      <div class="groups" id="groups" role="group" aria-label="Colour family"></div>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <section>
+      <p class="step-label">Or pick any colour</p>
+      <div class="custom">
+        <input type="color" id="picker" aria-label="Colour picker">
+        <input type="text" id="hex" maxlength="7" aria-label="Hex code" spellcheck="false" autocomplete="off">
+      </div>
+    </section>
+
+    <section>
+      <button class="save" id="save" type="button">Save image</button>
+      <p class="save-msg" id="save-msg" aria-live="polite"></p>
+    </section>
+
+    <p class="note">Shade colours are approximate screen matches. Check the real shade card before buying. The paint areas were found automatically, so a few spots may be missed or wrong. Tap "See house today" to compare with the house as it is now. The saved image has the shade names written under the photo, so you can send it to others.</p>
+  </div>
+</div>
+
+<script>
+const SHADES = [  // name, code, hex (PaintDB, checked against published LRV), group
+  ["Absolute White", "L161", "#F3F2EC", "Whites"],
+  ["Love Song", "L144", "#F4F0E5", "Whites"],
+  ["Spotless", "L169", "#EEEEE8", "Whites"],
+  ["Autumn Valley", "7898", "#FCEDBF", "Whites"],
+  ["Pure Ivory", "L124", "#F3EEDD", "Whites"],
+  ["Pristine Linen", "L153", "#F0ECDE", "Whites"],
+  ["White Sugar", "L181", "#E7ECEB", "Whites"],
+  ["Innocent White", "L180", "#EAEAE9", "Whites"],
+  ["Pebble White", "L136", "#F1E8D8", "Whites"],
+  ["Natural Linen", "L132", "#F0E7D4", "Whites"],
+  ["Lap of Himalaya", "L186", "#E8E8E2", "Whites"],
+  ["Winter Morn", "7228", "#E4E5E4", "Whites"],
+  ["Natural Cream", "8483", "#E9E2D3", "Whites"],
+  ["Cosmic Dust", "8348", "#E7E7DE", "Creams & beiges"],
+  ["Tranquil Green", "8388", "#E6E7D9", "Creams & beiges"],
+  ["Garlic Pod", "8524", "#F3E5CC", "Creams & beiges"],
+  ["Grape Delight", "8220", "#E9E3DD", "Creams & beiges"],
+  ["Tapestry", "0972", "#E3E5D1", "Creams & beiges"],
+  ["White Fog", "L173", "#E7E1D6", "Creams & beiges"],
+  ["Wheat Sprig", "7891", "#F0DFBE", "Creams & beiges"],
+  ["Old Lace", "0950", "#EFDFCB", "Creams & beiges"],
+  ["Shepherd Trail", "8764", "#E6DED3", "Creams & beiges"],
+  ["Pine Nut", "3196", "#EBDEC7", "Creams & beiges"],
+  ["Silver Spree", "8460", "#E5DDD0", "Creams & beiges"],
+  ["Magnolia", "0387", "#F1DBBD", "Creams & beiges"],
+  ["Cashmere-N", "3119", "#E9DEC1", "Creams & beiges"],
+  ["Vanity", "5260", "#EED6CB", "Creams & beiges"],
+  ["Bonewhite", "0964", "#EAD8BE", "Creams & beiges"],
+  ["Enlighten-N", "4148", "#E0D8CB", "Creams & beiges"],
+  ["Beach Shack", "8603", "#ECD5C3", "Creams & beiges"],
+  ["Sisal Mat", "7890", "#EDD6AB", "Creams & beiges"],
+  ["Spice", "0477", "#EAD2BE", "Creams & beiges"],
+  ["Snow Fall", "8475", "#DDD4CA", "Creams & beiges"],
+  ["River Reed", "8539", "#E8D3BA", "Creams & beiges"],
+  ["Desert Dreams", "8779", "#E1D1C2", "Creams & beiges"],
+  ["Antique White", "0940", "#E4D1BF", "Creams & beiges"],
+  ["Sound of Music", "8756", "#DBD1C8", "Creams & beiges"],
+  ["Ice Age", "8299", "#D7D3CD", "Creams & beiges"],
+  ["Sweet Corn", "4214", "#E0CDAE", "Creams & beiges"],
+  ["Weathered White", "8442", "#D2C9BB", "Creams & beiges"],
+  ["Creamy Crust", "9514", "#D1C6B5", "Creams & beiges"],
+  ["Milky Coffee-N", "K115", "#C9C3BB", "Creams & beiges"],
+  ["Herbal Pack", "8602", "#DEBBA3", "Creams & beiges"],
+  ["Camel Skin", "9530", "#D6BDA3", "Creams & beiges"],
+  ["Silk Route", "0N13", "#CCBEAD", "Creams & beiges"],
+  ["Beige Rage", "8770", "#C6B6AA", "Creams & beiges"],
+  ["Silver Sleek-N", "K092", "#C1C6C4", "Greys"],
+  ["Grey Flannel", "8331", "#C5C5BC", "Greys"],
+  ["Stone Steps", "8426", "#C4C0B0", "Greys"],
+  ["Steel", "6142", "#BBBEBC", "Greys"],
+  ["Mainstream", "7491", "#DBE8E0", "Greens & blues"],
+  ["Phantom Lake", "7372", "#D9E5E3", "Greens & blues"],
+  ["Green Whisper", "2425", "#D9E5D5", "Greens & blues"],
+  ["Classic", "1243", "#C8D9E1", "Greens & blues"],
+  ["Baby Orchid-N", "L187", "#E7E2E9", "Pinks"],
+  ["Coral Rocks", "8019", "#F7DCC6", "Pinks"],
+  ["Blush Cream-N", "K224", "#EDDAC7", "Pinks"],
+  ["Dawn Blush-N", "K255", "#E2D1C7", "Pinks"],
+  ["Rose Petal", "0R08", "#D9C4B9", "Pinks"],
+  ["Brown Sugar", "8582", "#97735C", "Deep"],
+  ["Terracotta-N", "0427", "#8E4B3F", "Deep"],
+];
+// Window and door woodwork: Asian Paints enamel (Apcolite) colours. The numbered ones follow the IS 5 standard
+// colours; screen values come from the matching BS 381C references, so treat them as close, not exact.
+const ENAMELS = [
+  ["White", "", "#F4F4F0"], ["Bluebell White", "", "#E4EAEF"], ["Ivory", "", "#EFE4C8"], ["Light Grey", "IS 631", "#9AAA9F"],
+  ["Smoke Grey", "IS 692", "#7B93A3"], ["Dark Admiralty Grey", "IS 632", "#6B7477"], ["Golden Brown", "IS 414", "#A86C29"],
+  ["Middle Brown", "IS 411", "#74542F"], ["Dark Brown", "IS 412", "#5C422E"], ["Service Brown", "IS 499", "#59493E"],
+  ["Red Oxide", "IS 446", "#774430"], ["Signal Red", "IS 537", "#DD3420"], ["Bus Green", "IS 221", "#507D3A"],
+  ["Deep Bronze Green", "IS 224", "#3E4630"], ["French Blue", "IS 166", "#2458AF"], ["Oxford Blue", "IS 105", "#1F3057"],
+  ["Black", "", "#1C1C1C"],
+];
+const GROUPS = ["Whites", "Creams & beiges", "Greys", "Greens & blues", "Pinks", "Deep", "All"];
+const state = { active: "body", body: { hex: "#F3F2EC", name: "Absolute White L161" }, trim: { hex: "#F3E5CC", name: "Garlic Pod 8524" }, win: { hex: "#5C422E", name: "Dark Brown IS 412" } };
+const HOUSE = new URLSearchParams(location.search).get("house") || ".";
+const KEY = "hp-mock:" + location.pathname + HOUSE;
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.body && s.trim) { state.body = s.body; state.trim = s.trim; } if (s && s.win) state.win = s.win; } catch (e) {}
+// Earlier versions used rough screen guesses for some shades; refresh saved picks to the checked values.
+for (const k of ["body", "trim"]) { const m = SHADES.find(x => `${x[0]} ${x[1]}` === state[k].name); if (m) state[k].hex = m[2]; }
+
+// Each house folder has manifest.json (written by tools/pipeline/publish.py) listing its photos. Per photo:
+// photo = the real photo, map = R body weight, G trim weight, B light factor x 127.5, win = R window weight, G light x 127.5.
+let PHOTOS = {}, ORDER = [], TITLE = "House colours";
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d", { willReadFrequently: true });
+let W = 1200, H = 900;
+let orig, out, map, real, win, today = false;
+const cache = {};
+
+const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+
+function render(showOriginal) {
+  if (!orig || !map || !real || !win) return;
+  if (showOriginal) { ctx.putImageData(real, 0, 0); return; }
+  // Paint colour times the light falling on the wall; a lookup table per light level keeps it fast.
+  const lut = k => {
+    const c = hex2rgb(state[k].hex), t = new Float32Array(256 * 3);
+    for (let s = 0; s < 256; s++) { const f = s / 127.5; for (let j = 0; j < 3; j++) t[s * 3 + j] = Math.min(255, c[j] * f); }
+    return t;
+  };
+  const tb = lut("body"), tt = lut("trim"), tw = lut("win"), d = orig.data, m = map.data, wm = win.data, o = out.data;
+  for (let p = 0; p < d.length; p += 4) {
+    let r = d[p], g = d[p + 1], b = d[p + 2];
+    const wb = m[p] / 255, wt = m[p + 1] / 255, s3 = m[p + 2] * 3;
+    if (wb > 0) { r += (tb[s3] - r) * wb; g += (tb[s3 + 1] - g) * wb; b += (tb[s3 + 2] - b) * wb; }
+    if (wt > 0) { r += (tt[s3] - r) * wt; g += (tt[s3 + 1] - g) * wt; b += (tt[s3 + 2] - b) * wt; }
+    const ww = wm[p] / 255;
+    if (ww > 0) { const w3 = wm[p + 1] * 3; r += (tw[w3] - r) * ww; g += (tw[w3 + 1] - g) * ww; b += (tw[w3 + 2] - b) * ww; }
+    o[p] = r; o[p + 1] = g; o[p + 2] = b; o[p + 3] = 255;
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
+const $ = id => document.getElementById(id);
+const chips = $("chips");
+const groupsEl = $("groups");
+let group = "All";
+GROUPS.forEach(gname => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "group"; b.textContent = gname; b.dataset.group = gname;
+  b.setAttribute("aria-pressed", gname === group);
+  b.onclick = () => {
+    group = gname;
+    groupsEl.querySelectorAll(".group").forEach(x => x.setAttribute("aria-pressed", x.dataset.group === group));
+    showList();
+  };
+  groupsEl.appendChild(b);
+});
+const fullName = (name, code) => code ? `${name} ${code}` : name;
+ENAMELS.forEach(([name, code, hex]) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip enamel"; b.dataset.hex = hex; b.hidden = true;
+  b.innerHTML = `<div class="sw" style="background:${hex}"></div><div class="n">${name}</div><div class="c">${code || "Enamel"}</div>`;
+  b.onclick = () => setColour(hex, fullName(name, code));
+  chips.appendChild(b);
+});
+function showList() {
+  const wood = state.active === "win";
+  groupsEl.hidden = wood;
+  $("list-kind").textContent = wood ? "an enamel colour" : "a shade";
+  chips.querySelectorAll(".chip").forEach(c => {
+    const isEnamel = c.classList.contains("enamel");
+    c.hidden = wood ? !isEnamel : (isEnamel || (group !== "All" && c.dataset.group !== group));
+  });
+  chips.scrollLeft = 0;
+}
+SHADES.forEach(([name, code, hex, grp]) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.dataset.hex = hex; b.dataset.name = `${name} ${code}`; b.dataset.group = grp;
+  b.innerHTML = `<div class="sw" style="background:${hex}"></div><div class="n">${name}</div><div class="c">${code}</div>`;
+  b.onclick = () => setColour(hex, `${name} ${code}`);
+  chips.appendChild(b);
+});
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify({ body: state.body, trim: state.trim, win: state.win })); } catch (e) {} }
+
+function sync() {
+  for (const k of ["body", "trim", "win"]) {
+    $("sw-" + k).style.background = state[k].hex;
+    $("nm-" + k).textContent = state[k].name;
+    $("hx-" + k).textContent = state[k].hex.toUpperCase();
+    $("t-" + k).setAttribute("aria-pressed", state.active === k);
+  }
+  $("target-now").textContent = { body: "body (walls)", trim: "trim (bands, pillars, borders)", win: "windows and doors" }[state.active];
+  const cur = state[state.active];
+  $("picker").value = cur.hex.toLowerCase();
+  if (document.activeElement !== $("hex")) { $("hex").value = cur.hex.toUpperCase(); $("hex").removeAttribute("aria-invalid"); }
+  chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.hex.toLowerCase() === cur.hex.toLowerCase()));
+}
+
+let raf = 0;
+function setColour(hex, name) {
+  const list = state.active === "win" ? ENAMELS : SHADES;
+  const match = list.find(s => s[2].toLowerCase() === hex.toLowerCase());
+  state[state.active] = { hex, name: match ? fullName(match[0], match[1]) : (name || "Custom colour") };
+  sync(); save();
+  cancelAnimationFrame(raf); raf = requestAnimationFrame(() => setToday(false));
+}
+
+$("t-body").onclick = () => { state.active = "body"; sync(); showList(); };
+$("t-trim").onclick = () => { state.active = "trim"; sync(); showList(); };
+$("t-win").onclick = () => { state.active = "win"; sync(); showList(); };
+$("picker").addEventListener("input", e => setColour(e.target.value, "Custom colour"));
+$("hex").addEventListener("input", e => {
+  let v = e.target.value.trim(); if (v && v[0] !== "#") v = "#" + v;
+  const ok = /^#[0-9a-fA-F]{6}$/.test(v);
+  e.target.setAttribute("aria-invalid", ok || v.length < 7 ? "false" : "true");
+  if (ok) setColour(v.toUpperCase(), "Custom colour");
+});
+$("hex").addEventListener("blur", sync);
+
+const cmp = $("compare");
+// Tap to switch between the painted house and the house as it is today.
+function setToday(on) {
+  today = on;
+  cmp.textContent = on ? "Show painted" : "See house today";
+  cmp.setAttribute("aria-pressed", on);
+  render(on);
+}
+cmp.onclick = () => setToday(!today);
+
+const big = $("big"), photoBox = document.querySelector(".photo");
+function setBig(on) {
+  photoBox.classList.toggle("big", on);
+  big.textContent = on ? "Close \u2715" : "Full size";
+  big.setAttribute("aria-pressed", on);
+}
+big.onclick = () => setBig(!photoBox.classList.contains("big"));
+document.addEventListener("keydown", e => { if (e.key === "Escape") setBig(false); });
+
+function load(src) { return new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; }); }
+const base = HOUSE === "." ? "" : HOUSE.replace(/\/?$/, "/");
+async function showPhoto(key) {
+  document.querySelectorAll(".photos [data-photo]").forEach(b => b.setAttribute("aria-pressed", b.dataset.photo === key));
+  current = key;
+  const P = PHOTOS[key];
+  if (!cache[key]) {
+    const [photo, mp, rl, wn] = await Promise.all([load(base + P.photo), load(base + P.map), load(base + (P.today || P.photo)), load(base + P.win)]);
+    const w = P.w || photo.naturalWidth, h = P.h || photo.naturalHeight;
+    const off = document.createElement("canvas"); off.width = w; off.height = h;
+    const oc = off.getContext("2d", { willReadFrequently: true });
+    oc.drawImage(mp, 0, 0, w, h); const m = oc.getImageData(0, 0, w, h);
+    oc.clearRect(0, 0, w, h); oc.drawImage(wn, 0, 0, w, h); const wd = oc.getImageData(0, 0, w, h);
+    oc.drawImage(rl, 0, 0, w, h); const t = oc.getImageData(0, 0, w, h);
+    oc.drawImage(photo, 0, 0, w, h); const p = oc.getImageData(0, 0, w, h);
+    cache[key] = { map: m, orig: p, real: t, win: wd, w, h };
+  }
+  if (current !== key) return;   // a newer choice arrived while loading
+  const c = cache[key];
+  ({ map, orig, real, win } = c);
+  if (c.w !== W || c.h !== H || !out) { W = c.w; H = c.h; cv.width = W; cv.height = H; out = ctx.createImageData(W, H); }
+  document.documentElement.style.setProperty("--ar", (W / H).toFixed(4));
+  cv.setAttribute("aria-label", (P.label || "The house") + " with the chosen colours");
+  const cr = $("credit"); cr.textContent = "";
+  if (P.credit) {
+    // Photo credit from the manifest, built as text nodes (never HTML).
+    cr.append("Photo: ");
+    const a = document.createElement("a"); a.href = P.credit.url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = P.credit.title; cr.append(a, ` by ${P.credit.author}, ${P.credit.licence}`);
+    if (P.credit.licence_url) { cr.append(" ("); const l = document.createElement("a"); l.href = P.credit.licence_url; l.target = "_blank"; l.rel = "noopener"; l.textContent = "licence"; cr.append(l, "). Colours changed by this tool."); }
+  }
+  cr.hidden = !P.credit;
+  render(today);
+  try { localStorage.setItem(KEY + ":photo", key); } catch (e) {}
+}
+let current = null;
+fetch(base + "manifest.json", { cache: "no-cache" }).then(r => r.json()).then(man => {
+  TITLE = man.title || TITLE;
+  document.title = TITLE; $("title").textContent = TITLE;
+  ORDER = man.photos.map(p => p.key); man.photos.forEach(p => PHOTOS[p.key] = p);
+  const row = document.querySelector(".photos");
+  row.hidden = ORDER.length < 2;
+  man.photos.forEach(p => {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.photo = p.key; b.textContent = p.label || p.key;
+    b.onclick = () => showPhoto(p.key);
+    row.appendChild(b);
+  });
+  let first = ORDER[0]; try { const v = localStorage.getItem(KEY + ":photo"); if (v && PHOTOS[v]) first = v; } catch (e) {}
+  showPhoto(first);
+}).catch(() => { $("title").textContent = "This house link is not ready yet"; });
+
+// Save the painted photo as a JPEG with the chosen shades written in a band underneath.
+function swatchLine(c, x, y, k, label) {
+  c.fillStyle = state[k].hex; c.fillRect(x, y - 26, 34, 34);
+  c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; c.strokeRect(x, y - 26, 34, 34);
+  c.fillStyle = "#9d978a"; c.font = "600 20px Figtree, system-ui, sans-serif"; c.fillText(label, x + 48, y - 6);
+  c.fillStyle = "#f3efe6"; c.font = "600 26px Figtree, system-ui, sans-serif";
+  c.fillText(`${state[k].name} · ${state[k].hex.toUpperCase()}`, x + 48 + c.measureText(label).width * 1.05 + 12, y - 6);
+}
+$("save").onclick = () => {
+  render(false);
+  const band = 168, out2 = document.createElement("canvas");
+  out2.width = W; out2.height = H + band;
+  const c = out2.getContext("2d");
+  c.drawImage(cv, 0, 0);
+  if (today) render(true);
+  c.fillStyle = "#1f1d1a"; c.fillRect(0, H, W, band);
+  c.textBaseline = "alphabetic";
+  swatchLine(c, 32, H + 52, "body", "BODY");
+  swatchLine(c, 32, H + 100, "trim", "TRIM");
+  swatchLine(c, 32, H + 148, "win", "WINDOWS");
+  c.fillStyle = "#9d978a"; c.font = "600 20px Figtree, system-ui, sans-serif"; c.textAlign = "right";
+  c.fillText(TITLE, W - 32, H + 46);
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const name = `${slug(TITLE)}-${slug(current || "photo")}-${slug(state.body.name)}-${slug(state.trim.name)}.jpg`;
+  out2.toBlob(blob => {
+    if (!blob) { $("save-msg").textContent = "Could not make the image. Try again."; return; }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    $("save-msg").textContent = `Saved as ${name}. Look in your Downloads.`;
+  }, "image/jpeg", 0.92);
+};
+sync();
+</script>
+</body></html>

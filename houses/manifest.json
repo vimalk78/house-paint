@@ -1,0 +1,175 @@
+{
+ "title": "Paint preview: 10 Indian houses",
+ "photos": [
+  {
+   "key": "p1",
+   "label": "Kerala village",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p1-photo.jpg",
+   "map": "img/p1-map.png",
+   "win": "img/p1-win.png",
+   "today": "img/p1-photo.jpg",
+   "credit": {
+    "title": "Adakkapputhur House.JPG",
+    "author": "Isudev",
+    "licence": "CC0",
+    "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "url": "https://commons.wikimedia.org/wiki/File:Adakkapputhur_House.JPG"
+   }
+  },
+  {
+   "key": "p2",
+   "label": "Mysore mansion",
+   "w": 1264,
+   "h": 843,
+   "photo": "img/p2-photo.jpg",
+   "map": "img/p2-map.png",
+   "win": "img/p2-win.png",
+   "today": "img/p2-photo.jpg",
+   "credit": {
+    "title": "Devi Nanjunda Bhavan, Mysore (b).jpg",
+    "author": "Christopher J. Fynn",
+    "licence": "CC BY-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Devi_Nanjunda_Bhavan,_Mysore_(b).jpg"
+   }
+  },
+  {
+   "key": "p3",
+   "label": "Mysore modern",
+   "w": 1264,
+   "h": 843,
+   "photo": "img/p3-photo.jpg",
+   "map": "img/p3-map.png",
+   "win": "img/p3-win.png",
+   "today": "img/p3-photo.jpg",
+   "credit": {
+    "title": "A house on Contur Road, Mysore (03).jpg",
+    "author": "Christopher J. Fynn",
+    "licence": "CC BY-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:A_house_on_Contur_Road,_Mysore_(03).jpg"
+   }
+  },
+  {
+   "key": "p4",
+   "label": "Murud village",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p4-photo.jpg",
+   "map": "img/p4-map.png",
+   "win": "img/p4-win.png",
+   "today": "img/p4-photo.jpg",
+   "credit": {
+    "title": "A home in Murud Janjira Village.JPG",
+    "author": "Ejaazali Khan",
+    "licence": "CC BY-SA 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:A_home_in_Murud_Janjira_Village.JPG"
+   }
+  },
+  {
+   "key": "p5",
+   "label": "Kerala bungalow",
+   "w": 1365,
+   "h": 768,
+   "photo": "img/p5-photo.jpg",
+   "map": "img/p5-map.png",
+   "win": "img/p5-win.png",
+   "today": "img/p5-photo.jpg",
+   "credit": {
+    "title": "Banglow.jpg",
+    "author": "Rizwan jafar",
+    "licence": "CC BY-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Banglow.jpg"
+   }
+  },
+  {
+   "key": "p6",
+   "label": "Colonnade house",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p6-photo.jpg",
+   "map": "img/p6-map.png",
+   "win": "img/p6-win.png",
+   "today": "img/p6-photo.jpg",
+   "credit": {
+    "title": "Dr rajendra prasad house.jpg",
+    "author": "Wasimakhtar220",
+    "licence": "CC BY-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Dr_rajendra_prasad_house.jpg"
+   }
+  },
+  {
+   "key": "p7",
+   "label": "Gujarat stairs",
+   "w": 1213,
+   "h": 864,
+   "photo": "img/p7-photo.jpg",
+   "map": "img/p7-map.png",
+   "win": "img/p7-win.png",
+   "today": "img/p7-photo.jpg",
+   "credit": {
+    "title": "Dharusan, Gujarat 384285, India - panoramio (5).jpg",
+    "author": "My home, amrut joshi",
+    "licence": "CC BY 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by/3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Dharusan,_Gujarat_384285,_India_-_panoramio_(5).jpg"
+   }
+  },
+  {
+   "key": "p8",
+   "label": "Tamil Nadu tiled",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p8-photo.jpg",
+   "map": "img/p8-map.png",
+   "win": "img/p8-win.png",
+   "today": "img/p8-photo.jpg",
+   "credit": {
+    "title": "Church Parsonage, Valayankulan. Tamil Nadu - panoramio.jpg",
+    "author": "Pastor Sam",
+    "licence": "CC BY 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by/3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Church_Parsonage,_Valayankulan._Tamil_Nadu_-_panoramio.jpg"
+   }
+  },
+  {
+   "key": "p9",
+   "label": "Kashmir snow",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p9-photo.jpg",
+   "map": "img/p9-map.png",
+   "win": "img/p9-win.png",
+   "today": "img/p9-photo.jpg",
+   "credit": {
+    "title": "Traditional village house.jpg",
+    "author": "MAMOON Rashid Bhat",
+    "licence": "CC BY-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Traditional_village_house.jpg"
+   }
+  },
+  {
+   "key": "p10",
+   "label": "Silvassa bungalow",
+   "w": 1195,
+   "h": 896,
+   "photo": "img/p10-photo.jpg",
+   "map": "img/p10-map.png",
+   "win": "img/p10-win.png",
+   "today": "img/p10-photo.jpg",
+   "credit": {
+    "title": "Beautiful Bunglow,Selvassa, DNH - panoramio.jpg",
+    "author": "Raman Patel",
+    "licence": "CC BY 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by/3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Beautiful_Bunglow,Selvassa,_DNH_-_panoramio.jpg"
+   }
+  }
+ ]
+}
